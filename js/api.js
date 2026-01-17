@@ -3,7 +3,9 @@
  * Handles all HTTP requests to the backend API
  */
 
-const API_BASE_URL = '/api/v1';
+import { API_URI } from './config.js';
+
+const API_BASE_URL = `${API_URI}/api/v1`;
 
 /**
  * Get the stored auth token
@@ -213,13 +215,11 @@ async function getCourseDetail(courseId) {
  * Create a review for a course
  * @param {number} courseId
  * @param {Object} reviewData
- * @param {number} reviewData.year
- * @param {number} reviewData.semester
- * @param {number} reviewData.rating_overall
- * @param {number} reviewData.difficulty
- * @param {number} reviewData.workload
- * @param {string} reviewData.text
- * @param {number[]} [reviewData.tag_ids]
+ * @param {number} reviewData.rating_overall - Rating 1-5
+ * @param {number} reviewData.difficulty - Difficulty 1-5
+ * @param {number} reviewData.workload - Workload 1-5
+ * @param {string} reviewData.text - Review text (10-2000 chars)
+ * @param {number[]} [reviewData.tag_ids] - Array of tag IDs
  * @returns {Promise<Object>}
  */
 async function createReview(courseId, reviewData) {

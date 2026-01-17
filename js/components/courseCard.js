@@ -24,8 +24,10 @@ function renderCourseCard(course) {
   } = course;
 
   const ratingDisplay = avg_rating ? avg_rating.toFixed(1) : '-';
-  const difficultyDisplay = avg_difficulty ? avg_difficulty.toFixed(1) : '-';
-  const workloadDisplay = avg_workload ? avg_workload.toFixed(1) : '-';
+  // Invert difficulty/workload: lower value = harder/more work = show lower score
+  // This makes high scores = easy/less work (more intuitive)
+  const difficultyDisplay = avg_difficulty ? (6 - avg_difficulty).toFixed(1) : '-';
+  const workloadDisplay = avg_workload ? (6 - avg_workload).toFixed(1) : '-';
 
   return `
     <a href="#/courses/${id}" class="course-card card card--clickable">
@@ -40,11 +42,11 @@ function renderCourseCard(course) {
         </div>
         <div class="course-card__stat">
           <span class="course-card__stat-value">${difficultyDisplay}</span>
-          <span class="course-card__stat-label">난이도</span>
+          <span class="course-card__stat-label">쉬움</span>
         </div>
         <div class="course-card__stat">
           <span class="course-card__stat-value">${workloadDisplay}</span>
-          <span class="course-card__stat-label">과제량</span>
+          <span class="course-card__stat-label">여유</span>
         </div>
       </div>
 

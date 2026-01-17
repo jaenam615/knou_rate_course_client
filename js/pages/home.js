@@ -26,38 +26,71 @@ async function renderHomePage(container) {
       setMajors(majors);
     }
 
-    // Get top rated courses
-    const topCourses = await getCourses({ sort: 'top_rated', limit: 6 });
+    // Fetch top rated and recently reviewed courses in parallel
+    const [topCourses, latestCourses] = await Promise.all([
+      getCourses({ sort: 'top_rated', limit: 6 }),
+      getCourses({ sort: 'latest', limit: 6 }),
+    ]);
 
     // Render page
     container.innerHTML = `
       <div class="home-page">
         <!-- Hero Section -->
-        <div class="page-header text-center">
-          <h1 class="page-header__title">KNOU 강의평가</h1>
-          <p class="page-header__subtitle">
+        <div class="hero-section">
+          <h1 class="hero-section__title">KNOU 꿀과목</h1>
+          <p class="hero-section__subtitle">
             한국방송통신대학교 강의 후기를 확인하고 공유하세요
           </p>
-        </div>
 
-        <!-- Quick Search -->
-        <div class="filter-bar mb-6">
-          <div class="search-box">
-            <span class="search-box__icon">🔍</span>
-            <input
-              type="text"
-              class="search-box__input"
-              id="home-search"
-              placeholder="강의명으로 검색..."
-            >
+          <!-- Quick Search -->
+          <div class="hero-section__search">
+            <div class="search-box search-box--large">
+              <span class="search-box__icon">🔍</span>
+              <input
+                type="text"
+                class="search-box__input"
+                id="home-search"
+                placeholder="강의명으로 검색..."
+              >
+            </div>
           </div>
         </div>
 
+        <!-- Course Sections Grid -->
+        <div class="home-sections">
+          <!-- Top Rated Courses -->
+          <section class="home-section">
+            <div class="home-section__header">
+              <h2 class="home-section__title">
+                <span class="home-section__icon">⭐</span>
+                평점 높은 강의
+              </h2>
+              <a href="#/courses?sort=top_rated" class="btn btn--ghost btn--sm">더보기 →</a>
+            </div>
+            ${renderCourseGrid(topCourses)}
+          </section>
+
+          <!-- Recently Reviewed Courses -->
+          <section class="home-section">
+            <div class="home-section__header">
+              <h2 class="home-section__title">
+                <span class="home-section__icon">🕐</span>
+                최근 후기 강의
+              </h2>
+              <a href="#/courses?sort=latest" class="btn btn--ghost btn--sm">더보기 →</a>
+            </div>
+            ${renderCourseGrid(latestCourses)}
+          </section>
+        </div>
+
         <!-- Major Navigation -->
-        <section class="mb-6">
-          <h2 class="page-header__title" style="font-size: var(--font-size-xl); margin-bottom: var(--spacing-4);">
-            학과별 강의 찾기
-          </h2>
+        <section class="home-section home-section--majors">
+          <div class="home-section__header">
+            <h2 class="home-section__title">
+              <span class="home-section__icon">📚</span>
+              학과별 강의 찾기
+            </h2>
+          </div>
           <div class="major-list">
             ${majors.map(major => `
               <a href="#/courses?major_id=${major.id}" class="major-item">
@@ -65,17 +98,6 @@ async function renderHomePage(container) {
               </a>
             `).join('')}
           </div>
-        </section>
-
-        <!-- Top Rated Courses -->
-        <section>
-          <div class="flex justify-between items-center mb-4">
-            <h2 class="page-header__title" style="font-size: var(--font-size-xl);">
-              평점 높은 강의
-            </h2>
-            <a href="#/courses" class="btn btn--ghost">전체 보기 →</a>
-          </div>
-          ${renderCourseGrid(topCourses)}
         </section>
       </div>
     `;

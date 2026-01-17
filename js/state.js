@@ -102,9 +102,6 @@ const filterStore = createStore({
   // Tag filters for reviews
   evalMethodTags: [],
   freeformTags: [],
-  // Review year/semester filter
-  year: null,
-  semester: null,
 });
 
 // =============================================================================

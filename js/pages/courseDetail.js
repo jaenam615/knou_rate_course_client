@@ -75,8 +75,9 @@ function renderPage(container, course) {
   } = course;
 
   const ratingDisplay = avg_rating ? avg_rating.toFixed(1) : '-';
-  const difficultyDisplay = avg_difficulty ? avg_difficulty.toFixed(1) : '-';
-  const workloadDisplay = avg_workload ? avg_workload.toFixed(1) : '-';
+  // Invert: high score = easy/less work (more intuitive)
+  const difficultyDisplay = avg_difficulty ? (6 - avg_difficulty).toFixed(1) : '-';
+  const workloadDisplay = avg_workload ? (6 - avg_workload).toFixed(1) : '-';
 
   container.innerHTML = `
     <div class="course-detail-page">
@@ -109,11 +110,11 @@ function renderPage(container, course) {
               </div>
               <div class="course-info__stat">
                 <div class="course-info__stat-value">${difficultyDisplay}</div>
-                <div class="course-info__stat-label">난이도</div>
+                <div class="course-info__stat-label">쉬움</div>
               </div>
               <div class="course-info__stat">
                 <div class="course-info__stat-value">${workloadDisplay}</div>
-                <div class="course-info__stat-label">과제량</div>
+                <div class="course-info__stat-label">여유</div>
               </div>
               <div class="course-info__stat">
                 <div class="course-info__stat-value">${review_count}</div>

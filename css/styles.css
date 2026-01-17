@@ -216,6 +216,91 @@ main {
   color: var(--color-gray-600);
 }
 
+/* Header Dropdown */
+.header__dropdown {
+  position: relative;
+}
+
+.header__dropdown-trigger {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.header__dropdown-arrow {
+  font-size: var(--font-size-xs);
+  transition: transform 0.2s;
+}
+
+.header__dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 280px;
+  max-height: 400px;
+  overflow-y: auto;
+  background-color: var(--color-white);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.2s ease;
+  z-index: 200;
+}
+
+.header__dropdown-menu--open {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(4px);
+}
+
+.header__dropdown-group {
+  padding: var(--spacing-2) 0;
+  border-bottom: 1px solid var(--color-gray-100);
+}
+
+.header__dropdown-group:last-of-type {
+  border-bottom: none;
+}
+
+.header__dropdown-group-title {
+  padding: var(--spacing-2) var(--spacing-4);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-gray-500);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.header__dropdown-item {
+  display: block;
+  padding: var(--spacing-2) var(--spacing-4);
+  font-size: var(--font-size-sm);
+  color: var(--color-gray-700);
+  transition: background-color 0.15s;
+}
+
+.header__dropdown-item:hover {
+  background-color: var(--color-gray-50);
+  text-decoration: none;
+}
+
+.header__dropdown-footer {
+  padding: var(--spacing-2) 0;
+  border-top: 1px solid var(--color-gray-200);
+  margin-top: var(--spacing-2);
+}
+
+.header__dropdown-item--all {
+  font-weight: 500;
+  color: var(--color-primary);
+}
+
 /* --------------------------------------------------------------------------
    Buttons
    -------------------------------------------------------------------------- */
@@ -1035,6 +1120,90 @@ main {
 .gap-4 { gap: var(--spacing-4); }
 
 .hidden { display: none; }
+
+/* --------------------------------------------------------------------------
+   Home Page
+   -------------------------------------------------------------------------- */
+.home-page {
+  max-width: var(--max-width);
+  margin: 0 auto;
+}
+
+.hero-section {
+  text-align: center;
+  padding: var(--spacing-8) var(--spacing-4);
+  margin-bottom: var(--spacing-8);
+  background: linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-white) 100%);
+  border-radius: var(--radius-xl);
+}
+
+.hero-section__title {
+  font-size: var(--font-size-3xl);
+  font-weight: 700;
+  color: var(--color-gray-900);
+  margin-bottom: var(--spacing-2);
+}
+
+.hero-section__subtitle {
+  font-size: var(--font-size-lg);
+  color: var(--color-gray-600);
+  margin-bottom: var(--spacing-6);
+}
+
+.hero-section__search {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.search-box--large .search-box__input {
+  padding: var(--spacing-3) var(--spacing-4);
+  padding-left: var(--spacing-12);
+  font-size: var(--font-size-lg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.search-box--large .search-box__icon {
+  left: var(--spacing-4);
+  font-size: var(--font-size-lg);
+}
+
+.home-sections {
+  display: grid;
+  gap: var(--spacing-8);
+  margin-bottom: var(--spacing-8);
+}
+
+.home-section {
+  background-color: var(--color-white);
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-6);
+}
+
+.home-section--majors {
+  background-color: var(--color-gray-50);
+}
+
+.home-section__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-4);
+}
+
+.home-section__title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  color: var(--color-gray-900);
+}
+
+.home-section__icon {
+  font-size: var(--font-size-xl);
+}
 
 /* --------------------------------------------------------------------------
    Responsive Design

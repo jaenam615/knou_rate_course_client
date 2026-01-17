@@ -43,8 +43,6 @@ function getRatingLabel(rating, type) {
 function renderReview(review) {
   const {
     id,
-    year,
-    semester,
     rating_overall,
     difficulty,
     workload,
@@ -60,9 +58,6 @@ function renderReview(review) {
     <div class="review" data-review-id="${id}">
       <div class="review__header">
         <div class="review__meta">
-          ${year}년 ${semester}학기 수강
-        </div>
-        <div class="review__meta">
           ${formatDate(created_at)}
         </div>
       </div>
@@ -73,12 +68,12 @@ function renderReview(review) {
           <span class="review__rating-label">평점</span>
         </div>
         <div class="review__rating-item">
-          <span class="review__rating-value">${difficulty}</span>
-          <span class="review__rating-label">난이도</span>
+          <span class="review__rating-value">${6 - difficulty}</span>
+          <span class="review__rating-label">쉬움</span>
         </div>
         <div class="review__rating-item">
-          <span class="review__rating-value">${workload}</span>
-          <span class="review__rating-label">과제량</span>
+          <span class="review__rating-value">${6 - workload}</span>
+          <span class="review__rating-label">여유</span>
         </div>
       </div>
 
@@ -131,12 +126,6 @@ function renderReviewForm(courseId) {
   const evalMethodTags = tags.filter(t => t.type === 'EVAL_METHOD');
   const freeformTags = tags.filter(t => t.type === 'FREEFORM');
 
-  const currentYear = new Date().getFullYear();
-  const years = [];
-  for (let i = 0; i <= 5; i++) {
-    years.push(currentYear - i);
-  }
-
   if (!isAuthenticated) {
     return `
       <div class="review-form">
@@ -153,25 +142,6 @@ function renderReviewForm(courseId) {
   return `
     <div class="review-form" id="review-form" data-course-id="${courseId}">
       <h3 class="review-form__title">후기 작성</h3>
-
-      <div class="review-form__row">
-        <div class="form-group">
-          <label class="form-label">수강 연도</label>
-          <select class="form-select" id="review-year" required>
-            ${years.map(year => `
-              <option value="${year}">${year}년</option>
-            `).join('')}
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">학기</label>
-          <select class="form-select" id="review-semester" required>
-            <option value="1">1학기</option>
-            <option value="2">2학기</option>
-          </select>
-        </div>
-      </div>
 
       <div class="review-form__row">
         <div class="form-group">
@@ -312,8 +282,6 @@ function bindReviewFormEvents(onSubmit) {
       const form = document.getElementById('review-form');
       const courseId = parseInt(form.dataset.courseId);
 
-      const year = parseInt(document.getElementById('review-year').value);
-      const semester = parseInt(document.getElementById('review-semester').value);
       const rating_overall = getSelectedRating('rating-overall');
       const difficulty = getSelectedRating('rating-difficulty');
       const workload = getSelectedRating('rating-workload');
@@ -342,8 +310,6 @@ function bindReviewFormEvents(onSubmit) {
       }
 
       const reviewData = {
-        year,
-        semester,
         rating_overall,
         difficulty,
         workload,
@@ -384,12 +350,6 @@ function clearFormError() {
  * Reset review form
  */
 function resetReviewForm() {
-  // Reset selects
-  const yearSelect = document.getElementById('review-year');
-  const semesterSelect = document.getElementById('review-semester');
-  if (yearSelect) yearSelect.selectedIndex = 0;
-  if (semesterSelect) semesterSelect.selectedIndex = 0;
-
   // Reset rating inputs
   const ratingButtons = document.querySelectorAll('.rating-input__btn--selected');
   ratingButtons.forEach(btn => btn.classList.remove('rating-input__btn--selected'));
