@@ -6,6 +6,30 @@
 import { escapeHtml } from './header.js';
 
 /**
+ * Get difficulty label from value (1-5 scale)
+ * @param {number} val
+ * @returns {string}
+ */
+function getDifficultyLabel(val) {
+  if (!val) return '-';
+  const labels = ['', '매우 쉬움', '쉬움', '중간', '어려움', '매우 어려움'];
+  const rounded = Math.round(val);
+  return labels[rounded] || '중간';
+}
+
+/**
+ * Get workload label from value (1-5 scale)
+ * @param {number} val
+ * @returns {string}
+ */
+function getWorkloadLabel(val) {
+  if (!val) return '-';
+  const labels = ['', '매우 적음', '적음', '중간', '많음', '매우 많음'];
+  const rounded = Math.round(val);
+  return labels[rounded] || '중간';
+}
+
+/**
  * Render a single course card
  * @param {Object} course
  * @returns {string} HTML string
@@ -15,7 +39,6 @@ function renderCourseCard(course) {
     id,
     course_code,
     name,
-    credits,
     major_name,
     avg_rating,
     avg_difficulty,
@@ -24,14 +47,12 @@ function renderCourseCard(course) {
   } = course;
 
   const ratingDisplay = avg_rating ? avg_rating.toFixed(1) : '-';
-  // Invert difficulty/workload: lower value = harder/more work = show lower score
-  // This makes high scores = easy/less work (more intuitive)
-  const difficultyDisplay = avg_difficulty ? (6 - avg_difficulty).toFixed(1) : '-';
-  const workloadDisplay = avg_workload ? (6 - avg_workload).toFixed(1) : '-';
+  const difficultyDisplay = getDifficultyLabel(avg_difficulty);
+  const workloadDisplay = getWorkloadLabel(avg_workload);
 
   return `
     <a href="#/courses/${id}" class="course-card card card--clickable">
-      <div class="course-card__code">${escapeHtml(course_code)} · ${credits}학점</div>
+      <div class="course-card__code">${escapeHtml(course_code)}</div>
       <div class="course-card__name">${escapeHtml(name)}</div>
       <div class="course-card__major">${escapeHtml(major_name)}</div>
 
@@ -42,11 +63,11 @@ function renderCourseCard(course) {
         </div>
         <div class="course-card__stat">
           <span class="course-card__stat-value">${difficultyDisplay}</span>
-          <span class="course-card__stat-label">쉬움</span>
+          <span class="course-card__stat-label">난이도</span>
         </div>
         <div class="course-card__stat">
           <span class="course-card__stat-value">${workloadDisplay}</span>
-          <span class="course-card__stat-label">여유</span>
+          <span class="course-card__stat-label">과제량</span>
         </div>
       </div>
 
@@ -163,4 +184,81 @@ function renderCourseTable(courses) {
   `;
 }
 
-export { renderCourseCard, renderCourseGrid, renderStars, renderCourseTable };
+/**
+ * Render a horizontal course card (slim, wide)
+ * @param {Object} course
+ * @returns {string} HTML string
+ */
+function renderCourseCardHorizontal(course) {
+  const {
+    id,
+    course_code,
+    name,
+    major_name,
+    avg_rating,
+    avg_difficulty,
+    avg_workload,
+    review_count,
+  } = course;
+
+  const ratingDisplay = avg_rating ? avg_rating.toFixed(1) : '-';
+  const difficultyDisplay = getDifficultyLabel(avg_difficulty);
+  const workloadDisplay = getWorkloadLabel(avg_workload);
+
+  return `
+    <a href="#/courses/${id}" class="course-card-h card">
+      <div class="course-card-h__main">
+        <div class="course-card-h__info">
+          <span class="course-card-h__code">${escapeHtml(course_code)}</span>
+        </div>
+        <div class="course-card-h__name">${escapeHtml(name)}</div>
+        <div class="course-card-h__major">${escapeHtml(major_name)}</div>
+      </div>
+      <div class="course-card-h__stats">
+        <div class="course-card-h__stat course-card-h__stat--rating">
+          <span class="course-card-h__stat-value">${ratingDisplay}</span>
+          <span class="course-card-h__stat-label">평점</span>
+        </div>
+        <div class="course-card-h__stat">
+          <span class="course-card-h__stat-value">${difficultyDisplay}</span>
+          <span class="course-card-h__stat-label">난이도</span>
+        </div>
+        <div class="course-card-h__stat">
+          <span class="course-card-h__stat-value">${workloadDisplay}</span>
+          <span class="course-card-h__stat-label">과제량</span>
+        </div>
+        <div class="course-card-h__stat">
+          <span class="course-card-h__stat-value">${review_count}</span>
+          <span class="course-card-h__stat-label">후기</span>
+        </div>
+      </div>
+    </a>
+  `;
+}
+
+/**
+ * Render a list of horizontal course cards
+ * @param {Array} courses
+ * @returns {string} HTML string
+ */
+function renderCourseList(courses) {
+  const courseList = Array.isArray(courses) ? courses : (courses?.courses || courses?.data || []);
+
+  if (!courseList || courseList.length === 0) {
+    return `
+      <div class="empty-state">
+        <div class="empty-state__icon">&#128218;</div>
+        <div class="empty-state__title">강의를 찾을 수 없습니다</div>
+        <div class="empty-state__description">검색어나 필터를 변경해 보세요.</div>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="course-list">
+      ${courseList.map(course => renderCourseCardHorizontal(course)).join('')}
+    </div>
+  `;
+}
+
+export { renderCourseCard, renderCourseGrid, renderStars, renderCourseTable, renderCourseCardHorizontal, renderCourseList };

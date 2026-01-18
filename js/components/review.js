@@ -36,6 +36,59 @@ function getRatingLabel(rating, type) {
 }
 
 /**
+ * Get difficulty label from value (1-5 scale)
+ * @param {number} val
+ * @returns {string}
+ */
+function getDifficultyLabel(val) {
+  const labels = ['', '매우 쉬움', '쉬움', '중간', '어려움', '매우 어려움'];
+  const rounded = Math.round(val);
+  return labels[rounded] || '중간';
+}
+
+/**
+ * Get workload label from value (1-5 scale)
+ * @param {number} val
+ * @returns {string}
+ */
+function getWorkloadLabel(val) {
+  const labels = ['', '매우 적음', '적음', '중간', '많음', '매우 많음'];
+  const rounded = Math.round(val);
+  return labels[rounded] || '중간';
+}
+
+/**
+ * Render a rating bar visualization (like Jobplanet style)
+ * @param {number} value - Rating value (1-5)
+ * @param {string} type - 'difficulty' or 'workload'
+ * @returns {string} HTML string
+ */
+function renderRatingBar(value, type) {
+  const labels = type === 'difficulty'
+    ? ['매우 쉬움', '쉬움', '중간', '어려움', '매우 어려움']
+    : ['매우 적음', '적음', '중간', '많음', '매우 많음'];
+
+  const rounded = Math.round(value);
+  const label = labels[rounded - 1] || labels[2];
+
+  // Generate 5 segments
+  const segments = [1, 2, 3, 4, 5].map(i => {
+    const isFilled = i <= rounded;
+    return `<div class="rating-bar__segment ${isFilled ? 'rating-bar__segment--filled' : ''}"></div>`;
+  }).join('');
+
+  return `
+    <div class="rating-bar">
+      <div class="rating-bar__label">${type === 'difficulty' ? '난이도' : '과제량'}</div>
+      <div class="rating-bar__track">
+        ${segments}
+      </div>
+      <div class="rating-bar__value">${label}</div>
+    </div>
+  `;
+}
+
+/**
  * Render a single review
  * @param {Object} review
  * @returns {string} HTML string
@@ -57,24 +110,18 @@ function renderReview(review) {
   return `
     <div class="review" data-review-id="${id}">
       <div class="review__header">
+        <div class="review__rating-overall">
+          <span class="review__rating-overall-value">${rating_overall}</span>
+          <span class="review__rating-overall-label">평점</span>
+        </div>
         <div class="review__meta">
           ${formatDate(created_at)}
         </div>
       </div>
 
-      <div class="review__ratings">
-        <div class="review__rating-item">
-          <span class="review__rating-value">${rating_overall}</span>
-          <span class="review__rating-label">평점</span>
-        </div>
-        <div class="review__rating-item">
-          <span class="review__rating-value">${6 - difficulty}</span>
-          <span class="review__rating-label">쉬움</span>
-        </div>
-        <div class="review__rating-item">
-          <span class="review__rating-value">${6 - workload}</span>
-          <span class="review__rating-label">여유</span>
-        </div>
+      <div class="review__bars">
+        ${renderRatingBar(difficulty, 'difficulty')}
+        ${renderRatingBar(workload, 'workload')}
       </div>
 
       <div class="review__text">
@@ -155,22 +202,24 @@ function renderReviewForm(courseId) {
 
         <div class="form-group">
           <label class="form-label">난이도</label>
-          <div class="rating-input" id="rating-difficulty">
+          <div class="rating-input rating-input--text" id="rating-difficulty">
             ${[1, 2, 3, 4, 5].map(n => `
-              <button type="button" class="rating-input__btn" data-value="${n}">${n}</button>
+              <button type="button" class="rating-input__btn" data-value="${n}">
+                ${getRatingLabel(n, 'difficulty')}
+              </button>
             `).join('')}
           </div>
-          <div class="form-help">1: 매우 쉬움 ~ 5: 매우 어려움</div>
         </div>
 
         <div class="form-group">
           <label class="form-label">과제량</label>
-          <div class="rating-input" id="rating-workload">
+          <div class="rating-input rating-input--text" id="rating-workload">
             ${[1, 2, 3, 4, 5].map(n => `
-              <button type="button" class="rating-input__btn" data-value="${n}">${n}</button>
+              <button type="button" class="rating-input__btn" data-value="${n}">
+                ${getRatingLabel(n, 'workload')}
+              </button>
             `).join('')}
           </div>
-          <div class="form-help">1: 매우 적음 ~ 5: 매우 많음</div>
         </div>
       </div>
 
@@ -370,8 +419,11 @@ export {
   renderReview,
   renderReviewList,
   renderReviewForm,
+  renderRatingBar,
   bindReviewFormEvents,
   showFormError,
   clearFormError,
   resetReviewForm,
+  getDifficultyLabel,
+  getWorkloadLabel,
 };

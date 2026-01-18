@@ -4,12 +4,33 @@
  */
 
 import { getMajors, getCourses, getTrendingSearches } from '../api.js';
-import { dataStore, setMajors } from '../state.js';
+import { dataStore, setMajors, authStore } from '../state.js';
 import { renderCourseGrid, renderCourseTable } from '../components/courseCard.js';
 import { renderLoading } from '../components/loading.js';
 import { escapeHtml, showToast } from '../components/header.js';
 import { renderTrendingSearches, renderStatsWidget } from '../components/trendingSearches.js';
 import { router } from '../router.js';
+
+/**
+ * Render the review prompt box for users who haven't written enough reviews
+ * @param {number} reviewCount - Current number of reviews written
+ * @returns {string} HTML string
+ */
+function renderReviewPrompt(reviewCount) {
+  const remaining = 3 - reviewCount;
+  return `
+    <div class="review-prompt">
+      <div class="review-prompt__icon">📝</div>
+      <div class="review-prompt__content">
+        <div class="review-prompt__title">${remaining}개의 리뷰를 더 작성하고 평점을 확인하세요!</div>
+        <div class="review-prompt__description">
+          다른 학생들의 후기와 평점을 보려면 먼저 ${remaining}개의 리뷰를 작성해 주세요.
+        </div>
+      </div>
+      <a href="#/courses" class="btn btn--primary">강의 둘러보기</a>
+    </div>
+  `;
+}
 
 /**
  * Render the home page
@@ -29,12 +50,67 @@ async function renderHomePage(container) {
       setMajors(majors);
     }
 
-    // Fetch top rated, recently reviewed courses, and trending searches in parallel
-    const [topCourses, latestCourses, trendingData] = await Promise.all([
-      getCourses({ sort: 'top_rated', limit: 10 }),
-      getCourses({ sort: 'latest', limit: 6 }),
-      getTrendingSearches(10).catch(() => null), // Fallback to null if API fails
-    ]);
+    // Check user's access level
+    const { user, isAuthenticated } = authStore.getState();
+    const hasFullAccess = user?.has_full_access ?? false;
+    const reviewCount = user?.review_count ?? 0;
+
+    // Fetch trending searches (always needed)
+    // Only fetch courses if user has full access or is not authenticated
+    let topCourses = [];
+    let latestCourses = [];
+    let trendingData = null;
+
+    if (hasFullAccess || !isAuthenticated) {
+      [topCourses, latestCourses, trendingData] = await Promise.all([
+        getCourses({ sort: 'top_rated', limit: 10 }),
+        getCourses({ sort: 'latest', limit: 6 }),
+        getTrendingSearches(10).catch(() => null),
+      ]);
+    } else {
+      trendingData = await getTrendingSearches(10).catch(() => null);
+    }
+
+    // Render main content based on access level
+    const renderMainContent = () => {
+      // Show prompt if authenticated but doesn't have full access
+      if (isAuthenticated && !hasFullAccess) {
+        return `
+          <div class="home-sections">
+            ${renderReviewPrompt(reviewCount)}
+          </div>
+        `;
+      }
+
+      // Show course sections for users with full access or non-authenticated users
+      return `
+        <div class="home-sections">
+          <!-- Top Rated Courses (Table View) -->
+          <section class="home-section">
+            <div class="home-section__header">
+              <h2 class="home-section__title">
+                <span class="home-section__icon">&#11088;</span>
+                평점 높은 강의
+              </h2>
+              <a href="#/courses?sort=top_rated" class="btn btn--ghost btn--sm">더보기 &#8594;</a>
+            </div>
+            ${renderCourseTable(topCourses)}
+          </section>
+
+          <!-- Recently Reviewed Courses -->
+          <section class="home-section">
+            <div class="home-section__header">
+              <h2 class="home-section__title">
+                <span class="home-section__icon">&#128337;</span>
+                최근 후기 강의
+              </h2>
+              <a href="#/courses?sort=latest" class="btn btn--ghost btn--sm">더보기 &#8594;</a>
+            </div>
+            ${renderCourseGrid(latestCourses)}
+          </section>
+        </div>
+      `;
+    };
 
     // Render page
     container.innerHTML = `
@@ -64,31 +140,7 @@ async function renderHomePage(container) {
         <div class="home-layout">
           <!-- Main Content -->
           <div class="home-main">
-            <div class="home-sections">
-              <!-- Top Rated Courses (Table View) -->
-              <section class="home-section">
-                <div class="home-section__header">
-                  <h2 class="home-section__title">
-                    <span class="home-section__icon">&#11088;</span>
-                    평점 높은 강의
-                  </h2>
-                  <a href="#/courses?sort=top_rated" class="btn btn--ghost btn--sm">더보기 &#8594;</a>
-                </div>
-                ${renderCourseTable(topCourses)}
-              </section>
-
-              <!-- Recently Reviewed Courses -->
-              <section class="home-section">
-                <div class="home-section__header">
-                  <h2 class="home-section__title">
-                    <span class="home-section__icon">&#128337;</span>
-                    최근 후기 강의
-                  </h2>
-                  <a href="#/courses?sort=latest" class="btn btn--ghost btn--sm">더보기 &#8594;</a>
-                </div>
-                ${renderCourseGrid(latestCourses)}
-              </section>
-            </div>
+            ${renderMainContent()}
           </div>
 
           <!-- Sidebar -->

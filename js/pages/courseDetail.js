@@ -5,7 +5,7 @@
 
 import { getCourseDetail, getTags, createReview } from '../api.js';
 import { dataStore, setTags, setCurrentCourse } from '../state.js';
-import { renderReviewList, renderReviewForm, bindReviewFormEvents, resetReviewForm } from '../components/review.js';
+import { renderReviewList, renderReviewForm, renderRatingBar, bindReviewFormEvents, resetReviewForm } from '../components/review.js';
 import { renderLoading, renderError } from '../components/loading.js';
 import { showToast, escapeHtml } from '../components/header.js';
 
@@ -65,7 +65,6 @@ function renderPage(container, course) {
     id,
     course_code,
     name,
-    credits,
     major,
     avg_rating,
     avg_difficulty,
@@ -75,9 +74,6 @@ function renderPage(container, course) {
   } = course;
 
   const ratingDisplay = avg_rating ? avg_rating.toFixed(1) : '-';
-  // Invert: high score = easy/less work (more intuitive)
-  const difficultyDisplay = avg_difficulty ? (6 - avg_difficulty).toFixed(1) : '-';
-  const workloadDisplay = avg_workload ? (6 - avg_workload).toFixed(1) : '-';
 
   container.innerHTML = `
     <div class="course-detail-page">
@@ -99,27 +95,22 @@ function renderPage(container, course) {
         <div class="course-detail__main">
           <!-- Course Info Card -->
           <div class="course-info mb-6">
-            <div class="course-info__code">${escapeHtml(course_code)} · ${credits}학점</div>
-            <h1 class="course-info__title">${escapeHtml(name)}</h1>
-            ${major ? `<div class="course-card__major">${escapeHtml(major.name)}</div>` : ''}
+            <div class="course-info__header">
+              <div>
+                <div class="course-info__code">${escapeHtml(course_code)}</div>
+                <h1 class="course-info__title">${escapeHtml(name)}</h1>
+                ${major ? `<div class="course-card__major">${escapeHtml(major.name)}</div>` : ''}
+              </div>
+              <div class="course-info__rating-big">
+                <div class="course-info__rating-big-value">${ratingDisplay}</div>
+                <div class="course-info__rating-big-label">평점</div>
+                <div class="course-info__rating-big-count">${review_count}개의 후기</div>
+              </div>
+            </div>
 
-            <div class="course-info__stats">
-              <div class="course-info__stat">
-                <div class="course-info__stat-value">${ratingDisplay}</div>
-                <div class="course-info__stat-label">평점</div>
-              </div>
-              <div class="course-info__stat">
-                <div class="course-info__stat-value">${difficultyDisplay}</div>
-                <div class="course-info__stat-label">쉬움</div>
-              </div>
-              <div class="course-info__stat">
-                <div class="course-info__stat-value">${workloadDisplay}</div>
-                <div class="course-info__stat-label">여유</div>
-              </div>
-              <div class="course-info__stat">
-                <div class="course-info__stat-value">${review_count}</div>
-                <div class="course-info__stat-label">후기</div>
-              </div>
+            <div class="course-info__bars">
+              ${avg_difficulty ? renderRatingBar(avg_difficulty, 'difficulty') : ''}
+              ${avg_workload ? renderRatingBar(avg_workload, 'workload') : ''}
             </div>
           </div>
 

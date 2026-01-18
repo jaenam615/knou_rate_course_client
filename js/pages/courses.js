@@ -5,7 +5,7 @@
 
 import { getMajors, getCourses, getTags } from '../api.js';
 import { dataStore, filterStore, setMajors, setTags, setCourses, setFilters } from '../state.js';
-import { renderCourseGrid } from '../components/courseCard.js';
+import { renderCourseList } from '../components/courseCard.js';
 import { renderFilterBar, bindFilterBarEvents } from '../components/filterBar.js';
 import { renderLoading } from '../components/loading.js';
 import { showToast, escapeHtml } from '../components/header.js';
@@ -103,16 +103,19 @@ function renderPageStructure(container) {
 
   // Get current major name if filtered
   let pageTitle = '전체 강의';
+  let pageSubtitle = '한국방송통신대학교의 모든 강의를 검색하고 평점을 확인하세요';
   if (filters.majorId) {
     const major = majors.find(m => m.id === filters.majorId);
     if (major) {
       pageTitle = major.name;
+      pageSubtitle = `${major.name} 학과의 강의 목록입니다`;
     }
   }
 
   container.innerHTML = `
     <div class="courses-page">
-      <div class="page-header">
+      <!-- Page Header with gradient background -->
+      <div class="courses-page__header">
         ${filters.majorId ? `
           <nav class="page-header__breadcrumb">
             <a href="#/">홈</a>
@@ -121,17 +124,30 @@ function renderPageStructure(container) {
             <span>›</span>
             <span>${escapeHtml(pageTitle)}</span>
           </nav>
-        ` : ''}
-        <h1 class="page-header__title">${escapeHtml(pageTitle)}</h1>
+        ` : `
+          <nav class="page-header__breadcrumb">
+            <a href="#/">홈</a>
+            <span>›</span>
+            <span>전체 강의</span>
+          </nav>
+        `}
+        <h1 class="courses-page__title">${escapeHtml(pageTitle)}</h1>
+        <p class="courses-page__subtitle">${pageSubtitle}</p>
       </div>
 
-      ${renderFilterBar(handleFilterChange)}
-
-      <div id="courses-container">
-        ${renderLoading()}
+      <!-- Filter Section -->
+      <div class="courses-page__filters">
+        ${renderFilterBar(handleFilterChange)}
       </div>
 
-      <div id="pagination-container"></div>
+      <!-- Course List -->
+      <div class="courses-page__content">
+        <div id="courses-container">
+          ${renderLoading()}
+        </div>
+
+        <div id="pagination-container"></div>
+      </div>
     </div>
   `;
 }
@@ -165,7 +181,7 @@ async function loadCourses() {
     const courses = await getCourses(params);
     setCourses(courses);
 
-    coursesContainer.innerHTML = renderCourseGrid(courses);
+    coursesContainer.innerHTML = renderCourseList(courses);
 
     // Update pagination
     renderPagination(courses.length);

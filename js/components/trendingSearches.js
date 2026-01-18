@@ -86,10 +86,9 @@ function renderTrendingSearches(trendingData = null) {
  */
 function renderStatsWidget(stats = {}) {
   const {
-    totalCourses = '1,200+',
+    totalCourses = '339+',
     totalReviews = '5,000+',
-    totalMajors = '22',
-    avgRating = '4.2'
+    totalMajors = '24',
   } = stats;
 
   return `
@@ -107,10 +106,6 @@ function renderStatsWidget(stats = {}) {
         <div class="stats-widget__item">
           <div class="stats-widget__value">${totalMajors}</div>
           <div class="stats-widget__label">학과</div>
-        </div>
-        <div class="stats-widget__item">
-          <div class="stats-widget__value">${avgRating}</div>
-          <div class="stats-widget__label">평균 평점</div>
         </div>
       </div>
     </div>
