@@ -108,6 +108,9 @@ function setupRoutes(container) {
   router.on('/verify-email', (params, query) => {
     renderVerifyEmailPage(container, query);
   });
+
+  // Handle initial route after all routes are registered
+  router.handleRoute();
 }
 
 // Initialize when DOM is ready

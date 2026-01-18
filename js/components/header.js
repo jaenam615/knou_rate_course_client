@@ -1,6 +1,6 @@
 /**
  * Header Component
- * Navigation header with logo, nav links, and auth status
+ * Navigation header with logo, search, nav links, and auth status
  */
 
 import { authStore, dataStore } from '../state.js';
@@ -35,13 +35,27 @@ function renderHeader(container) {
   const html = `
     <div class="header">
       <div class="header__inner">
-        <a href="#/" class="header__logo">KNOU 꿀과목</a>
+        <a href="#/" class="header__logo">
+          <span class="header__logo-icon">K</span>
+          KNOU 꿀과목
+        </a>
+
+        <!-- Header Search -->
+        <div class="header__search">
+          <span class="header__search-icon">&#128269;</span>
+          <input
+            type="text"
+            class="header__search-input"
+            id="header-search"
+            placeholder="강의명, 학과로 검색..."
+          >
+        </div>
 
         <nav class="header__nav">
           <a href="#/" class="header__nav-link">홈</a>
           <div class="header__dropdown">
             <button class="header__nav-link header__dropdown-trigger" id="major-dropdown-btn">
-              학과별 강의 <span class="header__dropdown-arrow">▼</span>
+              학과별 <span class="header__dropdown-arrow">▼</span>
             </button>
             <div class="header__dropdown-menu" id="major-dropdown-menu">
               ${Object.entries(groupedMajors).map(([dept, deptMajors]) => `
@@ -66,12 +80,45 @@ function renderHeader(container) {
         <div class="header__user">
           ${isAuthenticated ? `
             <span class="header__user-email">${escapeHtml(user.email)}</span>
-            <button class="btn btn--ghost" id="logout-btn">로그아웃</button>
+            <button class="btn btn--ghost btn--sm" id="logout-btn">로그아웃</button>
           ` : `
-            <a href="#/login" class="btn btn--ghost">로그인</a>
-            <a href="#/signup" class="btn btn--primary">회원가입</a>
+            <a href="#/login" class="btn btn--ghost btn--sm">로그인</a>
+            <a href="#/signup" class="btn btn--primary btn--sm">회원가입</a>
           `}
         </div>
+
+        <!-- Mobile Menu Button -->
+        <button class="header__mobile-btn" id="mobile-menu-btn" aria-label="메뉴">
+          &#9776;
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Navigation -->
+    <div class="mobile-nav" id="mobile-nav">
+      <div class="mobile-nav__search">
+        <input
+          type="text"
+          class="mobile-nav__search-input"
+          id="mobile-search"
+          placeholder="강의명, 학과로 검색..."
+        >
+      </div>
+      <div class="mobile-nav__links">
+        <a href="#/" class="mobile-nav__link">홈</a>
+        <a href="#/courses" class="mobile-nav__link">전체 강의</a>
+        ${isAuthenticated ? `
+          <a href="#" class="mobile-nav__link" id="mobile-logout">로그아웃</a>
+        ` : `
+          <a href="#/login" class="mobile-nav__link">로그인</a>
+          <a href="#/signup" class="mobile-nav__link">회원가입</a>
+        `}
+        <div class="mobile-nav__section-title">학과별 강의</div>
+        ${majors.map(major => `
+          <a href="#/courses?major_id=${major.id}" class="mobile-nav__link">
+            ${escapeHtml(major.name)}
+          </a>
+        `).join('')}
       </div>
     </div>
   `;
@@ -84,11 +131,23 @@ function renderHeader(container) {
   // Bind logout handler
   if (isAuthenticated) {
     const logoutBtn = container.querySelector('#logout-btn');
-    logoutBtn.addEventListener('click', handleLogout);
+    if (logoutBtn) logoutBtn.addEventListener('click', handleLogout);
+
+    const mobileLogout = container.querySelector('#mobile-logout');
+    if (mobileLogout) mobileLogout.addEventListener('click', (e) => {
+      e.preventDefault();
+      handleLogout();
+    });
   }
 
   // Bind dropdown handler
   bindDropdownEvents();
+
+  // Bind search handlers
+  bindSearchEvents();
+
+  // Bind mobile menu
+  bindMobileMenuEvents();
 }
 
 /**
@@ -121,15 +180,67 @@ function bindDropdownEvents() {
 }
 
 /**
+ * Bind search event handlers
+ */
+function bindSearchEvents() {
+  const headerSearch = document.getElementById('header-search');
+  const mobileSearch = document.getElementById('mobile-search');
+
+  const handleSearch = (input) => {
+    if (input) {
+      input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          const query = input.value.trim();
+          if (query) {
+            router.navigate(`/courses?q=${encodeURIComponent(query)}`);
+            input.value = '';
+            // Close mobile menu if open
+            const mobileNav = document.getElementById('mobile-nav');
+            if (mobileNav) mobileNav.classList.remove('mobile-nav--open');
+          }
+        }
+      });
+    }
+  };
+
+  handleSearch(headerSearch);
+  handleSearch(mobileSearch);
+}
+
+/**
+ * Bind mobile menu event handlers
+ */
+function bindMobileMenuEvents() {
+  const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+  const mobileNav = document.getElementById('mobile-nav');
+
+  if (mobileMenuBtn && mobileNav) {
+    mobileMenuBtn.addEventListener('click', () => {
+      mobileNav.classList.toggle('mobile-nav--open');
+      // Toggle button icon
+      mobileMenuBtn.innerHTML = mobileNav.classList.contains('mobile-nav--open') ? '&#10005;' : '&#9776;';
+    });
+
+    // Close mobile menu when clicking a link
+    mobileNav.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        mobileNav.classList.remove('mobile-nav--open');
+        mobileMenuBtn.innerHTML = '&#9776;';
+      });
+    });
+  }
+}
+
+/**
  * Update the active navigation link based on current route
  */
 function updateActiveNavLink() {
   const path = router.getCurrentPath();
-  const navLinks = document.querySelectorAll('.header__nav-link');
+  const navLinks = document.querySelectorAll('a.header__nav-link');
 
   navLinks.forEach(link => {
     link.classList.remove('header__nav-link--active');
-    const linkPath = link.getAttribute('href').slice(1); // Remove #
+    const linkPath = link.getAttribute('href')?.slice(1) || ''; // Remove #
 
     if (path === linkPath || (linkPath !== '/' && path.startsWith(linkPath))) {
       link.classList.add('header__nav-link--active');

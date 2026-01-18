@@ -242,6 +242,39 @@ async function getTags() {
 }
 
 // =============================================================================
+// Search API
+// =============================================================================
+
+/**
+ * Search courses by name
+ * @param {string} q - Search query (2-100 chars)
+ * @param {number} [limit=20] - Max results (1-50)
+ * @returns {Promise<Array>} Array of {id, course_code, name, major_name}
+ */
+async function searchCourses(q, limit = 20) {
+  const queryParams = new URLSearchParams();
+  queryParams.append('q', q);
+  if (limit) queryParams.append('limit', limit);
+
+  return apiRequest(`/search?${queryParams.toString()}`);
+}
+
+/**
+ * Get trending search terms
+ * @param {number} [limit=10] - Max results (1-20)
+ * @returns {Promise<Array>} Array of {rank, name, change, changeAmount}
+ */
+async function getTrendingSearches(limit = 10) {
+  const queryParams = new URLSearchParams();
+  if (limit) queryParams.append('limit', limit);
+
+  const queryString = queryParams.toString();
+  const endpoint = queryString ? `/trending?${queryString}` : '/trending';
+
+  return apiRequest(endpoint);
+}
+
+// =============================================================================
 // Export
 // =============================================================================
 
@@ -268,4 +301,7 @@ export {
   createReview,
   // Tags
   getTags,
+  // Search
+  searchCourses,
+  getTrendingSearches,
 };

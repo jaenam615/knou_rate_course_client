@@ -63,10 +63,13 @@ function renderCourseCard(course) {
  * @returns {string} HTML string
  */
 function renderCourseGrid(courses) {
-  if (!courses || courses.length === 0) {
+  // Handle case where API returns object with courses array
+  const courseList = Array.isArray(courses) ? courses : (courses?.courses || courses?.data || []);
+
+  if (!courseList || courseList.length === 0) {
     return `
       <div class="empty-state">
-        <div class="empty-state__icon">📚</div>
+        <div class="empty-state__icon">&#128218;</div>
         <div class="empty-state__title">강의를 찾을 수 없습니다</div>
         <div class="empty-state__description">검색어나 필터를 변경해 보세요.</div>
       </div>
@@ -75,7 +78,7 @@ function renderCourseGrid(courses) {
 
   return `
     <div class="course-grid">
-      ${courses.map(course => renderCourseCard(course)).join('')}
+      ${courseList.map(course => renderCourseCard(course)).join('')}
     </div>
   `;
 }
@@ -113,4 +116,51 @@ function renderStars(rating, showValue = true) {
   `;
 }
 
-export { renderCourseCard, renderCourseGrid, renderStars };
+/**
+ * Render a table-style course list (for top courses)
+ * @param {Array} courses
+ * @returns {string} HTML string
+ */
+function renderCourseTable(courses) {
+  // Handle case where API returns object with courses array
+  const courseList = Array.isArray(courses) ? courses : (courses?.courses || courses?.data || []);
+
+  if (!courseList || courseList.length === 0) {
+    return `
+      <div class="empty-state">
+        <div class="empty-state__icon">&#128218;</div>
+        <div class="empty-state__title">강의를 찾을 수 없습니다</div>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="course-table">
+      <div class="course-table__header">
+        <span class="course-table__col course-table__col--name">강의명</span>
+        <span class="course-table__col course-table__col--major">학과</span>
+        <span class="course-table__col course-table__col--rating">평점</span>
+        <span class="course-table__col course-table__col--reviews">후기</span>
+      </div>
+      ${courseList.map((course, index) => {
+        const ratingDisplay = course.avg_rating ? course.avg_rating.toFixed(1) : '-';
+        return `
+          <a href="#/courses/${course.id}" class="course-table__row">
+            <span class="course-table__col course-table__col--name">
+              <span class="course-table__rank">${index + 1}</span>
+              <span class="course-table__name-text">${escapeHtml(course.name)}</span>
+            </span>
+            <span class="course-table__col course-table__col--major">${escapeHtml(course.major_name)}</span>
+            <span class="course-table__col course-table__col--rating">
+              <span class="course-table__rating-star">&#9733;</span>
+              ${ratingDisplay}
+            </span>
+            <span class="course-table__col course-table__col--reviews">${course.review_count}</span>
+          </a>
+        `;
+      }).join('')}
+    </div>
+  `;
+}
+
+export { renderCourseCard, renderCourseGrid, renderStars, renderCourseTable };
