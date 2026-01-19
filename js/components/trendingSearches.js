@@ -93,7 +93,7 @@ function renderStatsWidget(stats = {}) {
 
   return `
     <div class="stats-widget">
-      <div class="stats-widget__title">KNOU 꿀과목 통계</div>
+      <div class="stats-widget__title">꿀과목 DB</div>
       <div class="stats-widget__grid">
         <div class="stats-widget__item">
           <div class="stats-widget__value">${totalCourses}</div>

@@ -1,0 +1,25 @@
+{
+  "name": "knou_rate_course_client",
+  "version": "1.0.0",
+  "description": "한국방송통신대학교 강의 후기 플랫폼 프론트엔드 클라이언트",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jaenam615/knou_rate_course_client.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jaenam615/knou_rate_course_client/issues"
+  },
+  "homepage": "https://github.com/jaenam615/knou_rate_course_client#readme",
+  "devDependencies": {
+    "vite": "^7.3.1"
+  }
+}
