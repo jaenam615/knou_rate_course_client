@@ -48,6 +48,15 @@ async function renderCourseDetailPage(container, params) {
 
     if (error.status === 404) {
       container.innerHTML = renderError('강의를 찾을 수 없습니다.');
+    } else if (error.status === 401) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state__icon">🔒</div>
+          <div class="empty-state__title">로그인이 필요합니다</div>
+          <div class="empty-state__description">후기 데이터를 보려면 로그인해주세요.</div>
+          <a href="#/login" class="btn btn--primary mt-4">로그인하기</a>
+        </div>
+      `;
     } else {
       showToast('데이터를 불러오는데 실패했습니다.', 'error');
       container.innerHTML = renderError('데이터를 불러올 수 없습니다.');

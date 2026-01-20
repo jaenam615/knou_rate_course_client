@@ -53,14 +53,25 @@ async function renderCoursesPage(container, query = {}) {
 
   } catch (error) {
     console.error('Error loading courses page:', error);
-    showToast('데이터를 불러오는데 실패했습니다.', 'error');
-    container.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-state__icon">⚠️</div>
-        <div class="empty-state__title">데이터를 불러올 수 없습니다</div>
-        <div class="empty-state__description">잠시 후 다시 시도해 주세요.</div>
-      </div>
-    `;
+    if (error.status === 401) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state__icon">🔒</div>
+          <div class="empty-state__title">로그인이 필요합니다</div>
+          <div class="empty-state__description">강의 데이터를 보려면 로그인해주세요.</div>
+          <a href="#/login" class="btn btn--primary mt-4">로그인하기</a>
+        </div>
+      `;
+    } else {
+      showToast('데이터를 불러오는데 실패했습니다.', 'error');
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state__icon">⚠️</div>
+          <div class="empty-state__title">데이터를 불러올 수 없습니다</div>
+          <div class="empty-state__description">잠시 후 다시 시도해 주세요.</div>
+        </div>
+      `;
+    }
   }
 }
 
@@ -188,13 +199,24 @@ async function loadCourses() {
 
   } catch (error) {
     console.error('Error loading courses:', error);
-    coursesContainer.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-state__icon">⚠️</div>
-        <div class="empty-state__title">강의를 불러올 수 없습니다</div>
-        <div class="empty-state__description">잠시 후 다시 시도해 주세요.</div>
-      </div>
-    `;
+    if (error.status === 401) {
+      coursesContainer.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state__icon">🔒</div>
+          <div class="empty-state__title">로그인이 필요합니다</div>
+          <div class="empty-state__description">강의 데이터를 보려면 로그인해주세요.</div>
+          <a href="#/login" class="btn btn--primary mt-4">로그인하기</a>
+        </div>
+      `;
+    } else {
+      coursesContainer.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state__icon">⚠️</div>
+          <div class="empty-state__title">강의를 불러올 수 없습니다</div>
+          <div class="empty-state__description">잠시 후 다시 시도해 주세요.</div>
+        </div>
+      `;
+    }
   }
 }
 

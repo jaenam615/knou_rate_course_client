@@ -258,8 +258,7 @@ function handleLogout() {
     isAuthenticated: false,
     isLoading: false,
   });
-  router.navigate('/');
-  showToast('로그아웃 되었습니다.', 'success');
+  window.location.href = '/';
 }
 
 /**
